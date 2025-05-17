@@ -3,6 +3,8 @@ from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 from datetime import date, datetime
 from typing import List
+from datetime import datetime, timezone
+import pandas as pd
 
 app = FastAPI()
 
@@ -18,7 +20,11 @@ session = cluster.connect(KEYSPACE)
 
 @app.get("/agg_one")
 def get_agg_one():
-    rows = session.execute("SELECT * FROM agg_one LIMIT 100")
+    current_date, current_hour = datetime.now(timezone.utc).strftime("%Y-%m-%d,%-H:%-M:%-S").split(",")
+    rows = session.execute("SELECT * FROM agg_one")
+    df = pd.DataFrame(rows.all())
+
+
     return [dict(row._asdict()) for row in rows]
 
 
