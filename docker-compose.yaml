@@ -104,6 +104,19 @@ services:
     networks:
       - datapipeline
 
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.webserver
+    container_name: webserver
+    ports:
+      - "7080:7080"
+    environment:
+      - CASSANDRA_HOST=cassandra
+    networks:
+    - datapipeline
+
+
 networks:
   datapipeline:
     name: datapipeline

@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS wiki_stream.agg_one (
     PRIMARY KEY ((domain, date, hour))
 );
 
-
 CREATE TABLE IF NOT EXISTS wiki_stream.agg_two (
     domain TEXT,
     date DATE,
@@ -56,7 +55,6 @@ CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_four (
     url TEXT,
     PRIMARY KEY(page_id, timestamp)
 );
-
 
 CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_five (
     user_id BIGINT,
