@@ -1,8 +1,9 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, decode
-from pyspark.sql.types import StructType, StructField, BooleanType, StringType
-
-allowed_domains = ["en.wikipedia.org", "www.wikidata.org", "commons.wikimedia.org"]
+from pyspark.sql.functions import col, from_json, decode, struct
+from pyspark.sql.types import StructType, StructField, BooleanType, StringType, LongType
+from pyspark.sql.functions import to_json, struct, lit
+from pyspark.sql.types import StructType, StructField, StringType, LongType, BooleanType
+from pyspark.sql.functions import col, from_json
 
 spark = SparkSession.builder \
     .appName("FilterBotsRawJson") \
@@ -10,38 +11,42 @@ spark = SparkSession.builder \
 
 spark.sparkContext.setLogLevel("WARN")
 
-filter_schema = StructType([
+schema = StructType([
     StructField("meta", StructType([
-        StructField("domain", StringType())
+        StructField("domain", StringType()),
+        StructField("uri", StringType())
     ])),
+    StructField("dt", StringType()),
+    StructField("page_id", LongType()),
+    StructField("page_title", StringType()),
     StructField("performer", StructType([
+        StructField("user_id", LongType()),
+        StructField("user_text", StringType()),
         StructField("user_is_bot", BooleanType())
     ]))
 ])
 
-input_df = spark.readStream \
+raw_df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:19092") \
     .option("subscribe", "input") \
-    .option("startingOffsets", "latest") \
     .load()
 
-raw_json_df = input_df.select(decode(col("value"), "utf-8").alias("raw_json"))
+parsed_df = raw_df.select(from_json(col("value").cast("string"), schema).alias("data"))
+output_df = parsed_df.select("data.*")
 
-parsed_df = raw_json_df.select(
-    col("raw_json"),
-    from_json(col("raw_json"), filter_schema).alias("parsed")
+kafka_ready_df = output_df.select(
+    lit(None).cast("string").alias("key"),
+    to_json(struct(
+        col("meta"),
+        col("dt"),
+        col("page_id"),
+        col("page_title"),
+        col("performer")
+    )).alias("value")
 )
 
-
-filtered_df = parsed_df.filter(
-    col("parsed.performer.user_is_bot") == False
-).filter(
-    col("parsed.meta.domain").isin(allowed_domains)
-)
-output_df = filtered_df.selectExpr("CAST(raw_json AS STRING) AS value")
-
-query = output_df.writeStream \
+query = kafka_ready_df.writeStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", "kafka:19092") \
     .option("topic", "processed") \

@@ -11,28 +11,30 @@ CREATE KEYSPACE IF NOT EXISTS wiki_stream WITH REPLICATION = {'class': 'SimpleSt
 
 CREATE TABLE IF NOT EXISTS wiki_stream.agg_one (
     domain TEXT,
+    date DATE,
     hour INT,
-    date date,
-    timestamp TIMESTAMP,
-    PRIMARY KEY ((domain, timestamp), date, hour)
+    count COUNTER,
+    PRIMARY KEY ((domain, date, hour))
 );
+
 
 CREATE TABLE IF NOT EXISTS wiki_stream.agg_two (
     domain TEXT,
-    hour INT,
     date DATE,
-    timestamp TIMESTAMP,
-    PRIMARY KEY ((domain, timestamp), date, hour)
+    hour INT,
+    count COUNTER,
+    PRIMARY KEY ((domain, date, hour))
 );
+
 
 CREATE TABLE IF NOT EXISTS wiki_stream.agg_three (
     user_id BIGINT,
     user_name TEXT,
-    timestamp TIMESTAMP,
     date DATE,
     hour INT,
+    timestamp TIMESTAMP,
     page_title TEXT,
-    PRIMARY KEY ((user_id), timestamp)
+    PRIMARY KEY ((user_id, date, hour), timestamp)
 );
 
 CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_one (
@@ -48,25 +50,19 @@ CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_two (
     PRIMARY KEY(user_id, timestamp)
 );
 
-
-CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_three (
-    domain TEXT,
-    timestamp TIMESTAMP,
-    url TEXT,
-    PRIMARY KEY((domain, url), timestamp)
-);
-
 CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_four (
     page_id BIGINT,
     timestamp timestamp,
     url TEXT,
-    PRIMARY KEY((page_id, url), timestamp)
+    PRIMARY KEY(page_id, timestamp)
 );
 
 
 CREATE TABLE IF NOT EXISTS wiki_stream.adhoc_five (
     user_id BIGINT,
     user_name TEXT,
+    hour INT,
+    date DATE,
     timestamp TIMESTAMP,
     PRIMARY KEY ((user_id, timestamp), hour)
 );
