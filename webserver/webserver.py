@@ -135,7 +135,7 @@ def get_adhoc_four(page_id: int):
     rows = session.execute("SELECT * FROM adhoc_four")
     df = pd.DataFrame(rows.all())
 
-    adhoc_four_json = {"page_id": page_id, "url": df[df["page_id"] == page_id]["url"][0]}
+    adhoc_four_json = {"page_id": page_id, "url": df[df["page_id"] == page_id]["url"].iloc[0]}
 
     return adhoc_four_json
 

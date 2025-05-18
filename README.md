@@ -4,53 +4,45 @@ Author: Davyd Ilnytskyi
 
 ---
 
-# Results
+# Design
 
-1. Скрипти запуску і видалення інсталяції Spark Streaming (або docker-compose файл з описом як ним користуватися)
-2. Скрипти запуску і видалення інсталяції Kafka (або docker-compose файл з описом як ним користуватися)
-3. Скрипти запуску і видалення інсталяції Cassandra (або docker-compose файл з описом як ним користуватися)\
-**Запуск**
-```
-bash run-cluster.sh
-```
+Data Fetching | Python Server -> Kafka Queue -> Spark Server -> Kafka Queue -> Spark -> Cassandra -> WebServer
 
-**Зупинка**
-```
-bash shutdown-cluster.sh
-```
+### Data fetching - Python Server
 
-4. Програмний код всіх компонентів (програма для читання потоку з ендпоїнта і запису в kafka, 2 програми Spark Streaming)
-- wikipedia endpoint -> kafka: ./kafka-producer/main.py
-- kafka -> kafka: ./spark/main.py
-- kafka -> cassandra: ./spark/submain.py
-5. Скріншоти з:
-- результатами читання консольними клієнтами з kafka топіків\
-![](./images/Kafka-input.png)
-![](./images/Kafka-processed.png)
-- результатами запитів до Cassandra\
-`select * from wiki_data.results;`
-![](./images/Cassandra-table.png)
+Main reason:
+- Easy to use
+
+### Data transfering - Kafka Queues
+
+Main reason:
+- Easy to use
+
+### Data processing - Spark Node
+Main reason:
+- Easy to use
+- Easy to work with streaming data
+
+### Webserver
 
 
----
 
-# Useful commands:
+----
+# Work demonstration
 
-__Spark Kafka-Kafka submission__:
-```
-spark-submit --master local[1] --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0 /opt/bitnami/spark/data/main.py
-```
-
-__Spark Kafka-Cassandra submission__:
-```
-spark-submit --master local[1] --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,com.datastax.spark:spark-cassandra-connector_2.12:3.5.0 --conf spark.cassandra.connection.host=cassandra --conf spark.cassandra.auth.username=cassandra --conf spark.cassandra.auth.password=uncommonpass /opt/bitnami/spark/data/submain.py
-```
-
-__Kafka Listeners__:
-```
-kafka-console-consumer --bootstrap-server localhost:9092 --topic input --from-beginning
-```
-
-```
-kafka-console-consumer --bootstrap-server localhost:9092 --topic processed --from-beginning
-```
+1. http://localhost:7080/agg_one
+![alt text](./images/agg-one.png)
+2. http://localhost:7080/agg_two
+![alt text](./images/agg-two.png)
+3. http://localhost:7080/agg_three
+![alt text](./images/agg-three.png)
+4. http://localhost:7080/adhoc_one
+![alt text](./images/adhoc-one.png)
+5. http://localhost:7080/adhoc_two?user_id=123
+![alt text](./images/adhoc-two.png)
+6. http://localhost:7080/adhoc_three?specified_domain=id.wikipedia.org
+![alt text](./images/adhoc-three.png)
+7. http://localhost:7080/adhoc_four?page_id=165480052
+![alt text](./images/adhoc-four.png)
+8. http://localhost:7080/adhoc_five?start_date=2025-05-17&end_date=2025-5-18
+![alt text](./images/adhoc-five.png)
