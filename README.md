@@ -13,18 +13,92 @@ Data Fetching | Python Server -> Kafka Queue -> Spark Server -> Kafka Queue -> S
 Main reason:
 - Easy to use
 
-### Data transfering - Kafka Queues
+### Data transfering - Two Kafka Queues
 
 Main reason:
 - Easy to use
+Gives an ability to work on different operations in parallel:
+- 1 spark stream cleans input queue data and sends it to processed queue
+- 1 spark stream processes processed queue and passes it to the tables
 
 ### Data processing - Spark Node
 Main reason:
 - Easy to use
 - Easy to work with streaming data
 
-### Webserver
 
+### Data saving - Cassandra
+- Easy to use
+
+
+---
+
+## Diagrams:
+1. Agg_one
++-----------------------------+
+|         agg_one            |
++-----------------------------+
+| domain     (PK)            |
+| date       (PK)            |
+| hour       (PK)            |
+| count      (counter)       |
++-----------------------------+
+2. Agg_two
++-----------------------------+
+|         agg_two            |
++-----------------------------+
+| domain     (PK)            |
+| date       (PK)            |
+| hour       (PK)            |
+| count      (counter)       |
++-----------------------------+
+3. Agg_three
++----------------------------------------------------+
+|                    agg_three                       |
++----------------------------------------------------+
+| user_id      (PK)                                  |
+| date         (PK)                                  |
+| hour         (PK)                                  |
+| timestamp    (CK)                                  |
+| user_name                                          |
+| page_title                                         |
++----------------------------------------------------+
+
+
+1. Adhoc_one
++-----------------------------+
+|        adhoc_one           |
++-----------------------------+
+| domain      (PK)           |
+| count       (counter)      |
++-----------------------------+
+
+2. Adhoc_two
++----------------------------------------+
+|              adhoc_two                |
++----------------------------------------+
+| user_id     (PK)                      |
+| timestamp   (CK)                      |
+| url                                   |
++----------------------------------------+
+3. Adhoc_four
++----------------------------------------+
+|              adhoc_four               |
++----------------------------------------+
+| page_id     (PK)                      |
+| timestamp   (CK)                      |
+| url                                   |
++----------------------------------------+
+4. Adhoc_five
++----------------------------------------------------+
+|                  adhoc_five                        |
++----------------------------------------------------+
+| user_id     (PK)                                   |
+| timestamp   (PK)                                   |
+| hour        (CK)                                   |
+| user_name                                          |
+| date                                               |
++----------------------------------------------------+
 
 
 ----
@@ -46,3 +120,5 @@ Main reason:
 ![alt text](./images/adhoc-four.png)
 8. http://localhost:7080/adhoc_five?start_date=2025-05-17&end_date=2025-5-18
 ![alt text](./images/adhoc-five.png)
+
+** Example of jsons for each request are in ./jsons directory. **
